@@ -24,7 +24,8 @@ thuẫn. File này chỉ giữ phần riêng của VnS, và mỗi luật riêng 
   module có `CMakeLists.txt` riêng và tự vào build qua glob.
 - `Client/`, `Server/`, `Tools/` — thư mục sản phẩm, hình hài của bản phát hành (X.10).
 - `assets/icons/` — bộ 27 icon của VnS, mỗi icon một `.ico` (16 đến 256 px) và một `.png` gốc, nền
-  trong suốt; `README.txt` của bộ ghi công dụng. Là nguồn duy nhất: exe C++ nhúng `.ico` qua
+  trong suốt; `README.txt` của bộ ghi công dụng. Do chính người dùng vẽ, nên thuộc bản quyền của VnS
+  theo `LICENSE`. Là nguồn duy nhất: exe C++ nhúng `.ico` qua
   `vns_exe_resources`, tool Python đọc `.png` hay `.ico` từ đây. Không chép icon rải vào nơi khác.
 - `third_party/<tên>/` — mã bên thứ ba giữ đúng từng byte upstream (X.4).
 - `tests/` — chỉ ra đời khi một phép thử không làm tay được (X.7).
@@ -139,7 +140,7 @@ một lần sau mỗi lần clone: `git config core.hooksPath .githooks`.
   hay clangd, và được add với `SYSTEM` nên header của nó không phát cảnh báo trong TU của VnS.
 - VnS là mã độc quyền: chỉ nhận giấy phép dễ dãi (MIT, BSD, Apache 2.0, zlib, Boost). GPL, LGPL,
   AGPL hay giấy phép chưa rõ thì hỏi người dùng trước khi thêm. Gói Python của `Tools/` theo cùng
-  luật (PyQt6 là GPL hoặc thương mại, xem X.10).
+  luật. Ngoại lệ đã chốt: PyQt6 (GPL hoặc thương mại) cho tool nội bộ, xem X.10.
 
 ## X.5 ASan và UBSan
 
@@ -275,8 +276,9 @@ Không pdb. Không chép tay exe hay DLL vào ba thư mục này: lần triển 
 
 **ADMIN** (`Tools/ADMIN/`) — GUI quản trị toàn bộ server.
 
-- Python 3.13 (`py`), PyQt6 ghim trong `pyproject.toml`. PyQt6 theo GPL hoặc giấy phép thương mại:
-  dùng nội bộ thì được, nhưng phát hành ADMIN ra ngoài thì phải hỏi người dùng trước (X.4).
+- Python 3.13 (`py`), PyQt6 ghim trong `pyproject.toml`. PyQt6 theo GPL hoặc giấy phép thương mại.
+  Người dùng chốt ngày 2026-09-30: ADMIN là công cụ nội bộ, không phát hành ra ngoài, nên GPL không
+  ràng buộc mã của VnS. Muốn đưa ADMIN hay một tool PyQt6 khác ra ngoài thì xét lại giấy phép trước.
 - Giao diện Fusion cổ điển: `app.setStyle("Fusion")` rồi `app.setPalette(app.style().standardPalette())`.
   Chỉ gọi `setColorScheme(Light)` thì không đủ: đã đo ngày 2026-09-30, dưới nền offscreen nó không
   có hiệu lực. Palette chuẩn của Fusion cho đúng bảng màu cổ điển (nền `#efefef`, chữ đen), bất kể
