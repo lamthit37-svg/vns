@@ -56,7 +56,7 @@
       "label": "VnS: cổng kiểm hình thức",
       "type": "process",
       "command": "cmd.exe",
-      "args": ["/d", "/c", "chcp 65001 >nul && call %USERPROFILE%\\.claude\\bin\\dev.bat && node tools/check_style.js src"],
+      "args": ["/d", "/c", "chcp 65001 >nul && call %USERPROFILE%\\.claude\\bin\\dev.bat && node scripts/check_style.js src"],
       "problemMatcher": []
     },
     {
@@ -74,6 +74,37 @@
       "problemMatcher": []
     },
     {
+      "label": "VnS: triển khai vào Client, Server, Tools",
+      "type": "process",
+      "command": "cmd.exe",
+      "args": ["/d", "/c", "chcp 65001 >nul && call %USERPROFILE%\\.claude\\bin\\dev.bat && cmake --workflow --preset deploy"],
+      "problemMatcher": ["$msCompile"]
+    },
+    {
+      "label": "VnS: chơi thử từ Client",
+      "type": "process",
+      "command": "${workspaceFolder}/Client/${input:client}.exe",
+      "options": { "cwd": "${workspaceFolder}/Client" },
+      "dependsOn": "VnS: triển khai vào Client, Server, Tools",
+      "problemMatcher": []
+    },
+    {
+      "label": "ADMIN: soát ruff và mypy",
+      "type": "process",
+      "command": "cmd.exe",
+      "args": ["/d", "/c", ".venv\\Scripts\\ruff check . && .venv\\Scripts\\ruff format --check . && .venv\\Scripts\\mypy ."],
+      "options": { "cwd": "${workspaceFolder}/Tools/ADMIN" },
+      "problemMatcher": []
+    },
+    {
+      "label": "ADMIN: tạo lại .venv",
+      "type": "process",
+      "command": "cmd.exe",
+      "args": ["/d", "/c", "py -3.13 -m venv .venv && .venv\\Scripts\\python -m pip install --group dev"],
+      "options": { "cwd": "${workspaceFolder}/Tools/ADMIN" },
+      "problemMatcher": []
+    },
+    {
       "label": "VnS: xoá thư mục build của một preset",
       "type": "process",
       "command": "cmd.exe",
@@ -87,6 +118,12 @@
       "type": "promptString",
       "description": "Tên exe trong build/dev/bin, không kèm đuôi .exe",
       "default": "vns"
+    },
+    {
+      "id": "client",
+      "type": "promptString",
+      "description": "Tên exe của client trong Client/, không kèm đuôi .exe",
+      "default": "VnS"
     },
     {
       "id": "preset",

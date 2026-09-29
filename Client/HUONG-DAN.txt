@@ -1,0 +1,10 @@
+VnS — bản dành cho người chơi
+
+Thư mục này là bản cài đầy đủ của VnS. Chép cả thư mục sang máy khác là chạy được, không cần cài
+đặt.
+
+Yêu cầu: Windows 10 bản 1903 trở lên, 64-bit. Thư viện chạy Microsoft Visual C++ đã nằm sẵn trong
+thư mục này, không cần cài thêm.
+
+Cài đặt và nhật ký của bạn lưu ở %LOCALAPPDATA%\VnS, không nằm trong thư mục này. Thay thư mục này
+bằng bản mới không làm mất cài đặt.

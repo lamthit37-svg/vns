@@ -1,0 +1,10 @@
+VnS — máy chủ
+
+- bin\ — exe của các tiến trình server, kèm thư viện chạy Microsoft Visual C++.
+- config\ — cấu hình TOML. Tệp <tên>.toml là mặc định đi kèm bản phát hành. Tệp <tên>.local.toml
+  cạnh nó, nếu có, ghi đè từng khoá, và là chỗ duy nhất được chứa mật khẩu, khoá bí mật hay địa
+  chỉ riêng của máy này. Tệp .local.toml không bao giờ nằm trong bản phát hành.
+- data\ — dữ liệu chạy (thế giới, tài khoản). Cập nhật bản mới không bao giờ xoá thư mục này.
+- logs\ — nhật ký.
+
+Quản trị bằng công cụ ADMIN, hoặc chạy tay exe trong bin\.

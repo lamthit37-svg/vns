@@ -1,15 +1,15 @@
 # Cờ nền, cảnh báo bổ sung, manifest UTF-8 và cổng kiểm cho mọi target của VnS.
-# CI của GitHub không có ~/.claude/bin, nên repo tự mang cổng kiểm (tools/check_style.js) và bộ cờ
-# nền của hiến pháp II.1 thay vì include cmake-quality.cmake của máy. Bản chép lệch bản của máy thì
-# configure cảnh báo, để chép lại chứ không để hai bản trôi xa nhau. Dùng trong src/<module>/:
+# CI của GitHub không có ~/.claude/bin, nên repo tự mang cổng kiểm (scripts/check_style.js) và bộ
+# cờ nền của hiến pháp II.1 thay vì include cmake-quality.cmake của máy. Bản chép lệch bản của máy
+# thì configure cảnh báo, để chép lại chứ không để hai bản trôi xa nhau. Dùng trong src/<module>/:
 #   add_library(vns_x STATIC x.cpp)
 #   vns_quality(vns_x)
 include_guard(GLOBAL)
 
 option(VNS_ANALYZE "Thêm /analyze của MSVC cho mọi target (preset analyze)" OFF)
-# CI bật để mọi preset dựng tools/ci/probe, kể cả khi src/ chưa có mã: runner đổi MSVC hay clang-cl
-# thì CI đỏ ngay, không đợi tới ngày có mã thật.
-option(VNS_TOOLCHAIN_PROBE "Dựng exe thăm dò toolchain tools/ci/probe" OFF)
+# CI bật để mọi preset dựng scripts/ci/probe, kể cả khi src/ chưa có mã: runner đổi MSVC hay
+# clang-cl thì CI đỏ ngay, không đợi tới ngày có mã thật.
+option(VNS_TOOLCHAIN_PROBE "Dựng exe thăm dò toolchain scripts/ci/probe" OFF)
 
 # Cổng hình thức so định dạng từng ký tự, mà mỗi bản clang-format định dạng hơi khác nhau. Đây là
 # chỗ ghim duy nhất: CI (.github/actions/setup) và hook pre-commit đọc số này, clang-tidy trên CI
@@ -44,7 +44,7 @@ function(vns_check_drift repo_file machine_file)
 endfunction()
 
 set(VNS_MACHINE_BIN "$ENV{USERPROFILE}/.claude/bin")
-vns_check_drift(${CMAKE_SOURCE_DIR}/tools/check_style.js ${VNS_MACHINE_BIN}/check_style.js)
+vns_check_drift(${CMAKE_SOURCE_DIR}/scripts/check_style.js ${VNS_MACHINE_BIN}/check_style.js)
 vns_check_drift(${CMAKE_SOURCE_DIR}/.clang-format ${VNS_MACHINE_BIN}/clang-format.template)
 
 # Cổng hình thức (hiến pháp V.5) quét src/ và tests/ nếu có. Mọi target qua vns_quality chờ nó.
@@ -65,16 +65,17 @@ function(vns_style_gate)
         endif()
     endforeach()
     if(VNS_TOOLCHAIN_PROBE)
-        list(APPEND dirs ${CMAKE_SOURCE_DIR}/tools/ci/probe)
+        list(APPEND dirs ${CMAKE_SOURCE_DIR}/scripts/ci/probe)
     endif()
     add_custom_target(check_style ALL
-        COMMAND "${VNS_NODE}" "${CMAKE_SOURCE_DIR}/tools/check_style.js" ${dirs}
+        COMMAND "${VNS_NODE}" "${CMAKE_SOURCE_DIR}/scripts/check_style.js" ${dirs}
         COMMENT "Cổng kiểm hình thức (hiến pháp V.5)"
         VERBATIM)
 endfunction()
 
 # Exe ASan của MSVC cần clang_rt.asan_dynamic-x86_64.dll, nằm cạnh cl.exe; ngoài môi trường dev.bat
-# nó chết ngay với 0xC0000135 (đo 2026-09-30). Chép DLL cạnh exe để chạy được từ VS Code và Explorer.
+# nó chết ngay với 0xC0000135 (đo 2026-09-30). Chép DLL cạnh exe để chạy được từ VS Code và
+# Explorer.
 function(vns_copy_asan_runtime target)
     if(NOT CMAKE_CXX_FLAGS_DEBUG MATCHES "fsanitize=address")
         return()

@@ -33,6 +33,41 @@ jobs:
           tar -xzf "$archive" actionlint
           ./actionlint -color
 
+  tools-python:
+    name: Tools Python (ruff, mypy)
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      # Mỗi Tools/<Tên>/pyproject.toml là một tool Python (CLAUDE.md mục X.10). .venv luôn được dựng
+      # để bắt sớm bản ghim không cài được; ruff và mypy chạy khi tool đã có tệp .py.
+      - name: ruff và mypy cho từng tool
+        shell: pwsh
+        run: |
+          $projects = @(Get-ChildItem -Path Tools -Filter pyproject.toml -Recurse -Depth 1 -File)
+          foreach ($project in $projects) {
+            Push-Location $project.DirectoryName
+            $sources = @(Get-ChildItem -Filter *.py -Recurse -File)
+            "== $($project.Directory.Name): $($sources.Count) tệp .py"
+            python -m venv .venv
+            .venv\Scripts\python.exe -m pip install --disable-pip-version-check --quiet --group dev
+            if ($LASTEXITCODE -ne 0) { throw "pip lỗi ở $($project.DirectoryName)" }
+            if ($sources.Count -gt 0) {
+              .venv\Scripts\ruff.exe check .
+              if ($LASTEXITCODE -ne 0) { throw 'ruff check đỏ' }
+              .venv\Scripts\ruff.exe format --check .
+              if ($LASTEXITCODE -ne 0) { throw 'ruff format đỏ' }
+              .venv\Scripts\mypy.exe .
+              if ($LASTEXITCODE -ne 0) { throw 'mypy đỏ' }
+            }
+            Pop-Location
+          }
+
   build:
     name: build (${{ matrix.preset }})
     runs-on: windows-2025-vs2026
@@ -48,7 +83,7 @@ jobs:
 
       - uses: ./.github/actions/setup
 
-      # VNS_TOOLCHAIN_PROBE dựng thêm tools/ci/probe, để cổng kiểm, tidy, /analyze và sanitizer có
+      # VNS_TOOLCHAIN_PROBE dựng thêm scripts/ci/probe, để cổng kiểm, tidy, /analyze và sanitizer có
       # mã thật mà chạy ngay cả khi src/ còn trống.
       - name: Configure và build
         shell: pwsh
@@ -63,6 +98,25 @@ jobs:
         run: |
           & "build/${{ matrix.preset }}/bin/vns_probe.exe"
           if ($LASTEXITCODE -ne 0) { throw "vns_probe trả mã $LASTEXITCODE (manifest UTF-8 hoặc runtime hỏng)." }
+
+      # Luật triển khai (CLAUDE.md mục X.10) trên runner: cài bản rel ra thư mục tạm, không đụng
+      # Client/, Server/, Tools/ của repo.
+      - name: Cài thử kiểu deploy
+        if: matrix.preset == 'rel'
+        shell: pwsh
+        run: |
+          $stage = Join-Path $env:RUNNER_TEMP 'stage'
+          cmake --install build/rel --prefix $stage
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $probeDir = Join-Path $stage 'Tools/Probe'
+          Get-ChildItem $probeDir | ForEach-Object Name
+          if (-not (Test-Path (Join-Path $probeDir 'vcruntime140.dll'))) { throw 'Thiếu DLL runtime MSVC.' }
+          if (Get-ChildItem $stage -Recurse -Filter *.pdb) { throw 'Bản triển khai không được có pdb.' }
+          $info = (Get-Item (Join-Path $probeDir 'vns_probe.exe')).VersionInfo
+          "FileDescription=$($info.FileDescription) ProductVersion=$($info.ProductVersion)"
+          if ($info.ProductVersion -notmatch '^\d+\.\d+\.\d+$') { throw 'Exe thiếu thông tin phiên bản.' }
+          & (Join-Path $probeDir 'vns_probe.exe')
+          if ($LASTEXITCODE -ne 0) { throw "vns_probe từ bản triển khai trả mã $LASTEXITCODE" }
 
       # Kiểm thử chính là danh sách tay docs/KIEM-THU.md; tests/ chỉ có khi một phép thử không làm
       # tay được (CLAUDE.md mục X.7), và khi đó nó chạy ở đây.

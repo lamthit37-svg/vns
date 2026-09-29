@@ -24,6 +24,17 @@
     "files.trimTrailingWhitespace": false
   },
 
+  "python.defaultInterpreterPath": "${workspaceFolder}/Tools/ADMIN/.venv/Scripts/python.exe",
+  "ruff.configuration": "${workspaceFolder}/Tools/ADMIN/pyproject.toml",
+  "mypy-type-checker.args": ["--config-file=${workspaceFolder}/Tools/ADMIN/pyproject.toml"],
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+
   "editor.rulers": [100],
   "files.encoding": "utf8",
   "files.eol": "\n",
@@ -33,9 +44,11 @@
     "*.manifest": "xml"
   },
   "files.watcherExclude": {
-    "**/build/**": true
+    "**/build/**": true,
+    "**/.venv/**": true
   },
   "search.exclude": {
-    "build/**": true
+    "build/**": true,
+    "**/.venv/**": true
   }
 }

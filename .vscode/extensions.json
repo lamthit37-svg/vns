@@ -3,7 +3,10 @@
     "llvm-vs-code-extensions.vscode-clangd",
     "ms-vscode.cpptools",
     "editorconfig.editorconfig",
-    "github.vscode-github-actions"
+    "github.vscode-github-actions",
+    "ms-python.python",
+    "charliermarsh.ruff",
+    "ms-python.mypy-type-checker"
   ],
   "unwantedRecommendations": [
     "ms-vscode.cmake-tools",

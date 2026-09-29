@@ -1,6 +1,7 @@
 # CD của VnS: đẩy tag vX.Y.Z (khớp project(VnS VERSION X.Y.Z) trong CMakeLists.txt) thì dựng preset
-# rel, đóng gói exe và pdb thành zip, kèm SHA256SUMS và chứng thực nguồn gốc build (provenance),
-# rồi tạo GitHub Release với ghi chú tự sinh từ commit.
+# rel và triển khai vào Client/ và Server/ đúng như trên máy dev (cmake --workflow --preset deploy),
+# rồi nén nguyên hai thư mục đó, kèm zip pdb, SHA256SUMS và chứng thực nguồn gốc build (provenance),
+# và tạo GitHub Release với ghi chú tự sinh từ commit. Tools/ là nội bộ, không phát hành.
 name: Release
 
 on:
@@ -41,9 +42,9 @@ jobs:
 
       - uses: ./.github/actions/setup
 
-      - name: Build rel
+      - name: Build rel và triển khai vào Client/, Server/
         shell: pwsh
-        run: cmake --workflow --preset rel
+        run: cmake --workflow --preset deploy
 
       - name: Test tự động
         if: hashFiles('tests/CMakeLists.txt') != ''
@@ -53,14 +54,15 @@ jobs:
       - name: Đóng gói
         shell: pwsh
         run: |
-          $bin = 'build/rel/bin'
-          $programs = @(Get-ChildItem -Path "$bin/*" -Include *.exe, *.dll -File)
-          if ($programs.Count -eq 0) { throw "$bin không có exe nào để phát hành." }
+          $clientExe = @(Get-ChildItem -Path Client -Filter *.exe -File -ErrorAction SilentlyContinue)
+          $serverExe = @(Get-ChildItem -Path Server/bin -Filter *.exe -File -ErrorAction SilentlyContinue)
+          if ($clientExe.Count + $serverExe.Count -eq 0) { throw 'Client/ và Server/bin/ không có exe nào để phát hành.' }
           $dist = New-Item -ItemType Directory -Force -Path dist
-          $name = "vns-$env:VNS_VERSION-win64"
-          Compress-Archive -Path $programs.FullName -DestinationPath "dist/$name.zip"
-          $symbols = @(Get-ChildItem -Path "$bin/*" -Include *.pdb -File)
-          if ($symbols.Count -gt 0) { Compress-Archive -Path $symbols.FullName -DestinationPath "dist/$name-pdb.zip" }
+          $base = "vns-$env:VNS_VERSION-win64"
+          if ($clientExe.Count -gt 0) { Compress-Archive -Path Client -DestinationPath "dist/$base-client.zip" }
+          if ($serverExe.Count -gt 0) { Compress-Archive -Path Server -DestinationPath "dist/$base-server.zip" }
+          $symbols = @(Get-ChildItem -Path build/rel/bin -Filter *.pdb -File)
+          if ($symbols.Count -gt 0) { Compress-Archive -Path $symbols.FullName -DestinationPath "dist/$base-pdb.zip" }
           $sums = Get-ChildItem -Path dist -Filter *.zip | ForEach-Object {
             $hash = (Get-FileHash -Algorithm SHA256 -Path $_.FullName).Hash.ToLowerInvariant()
             "$hash  $($_.Name)"

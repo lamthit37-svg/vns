@@ -1,0 +1,37 @@
+# ADMIN — công cụ quản trị mọi server của VnS: GUI PyQt6, style Fusion. Quy cách ở CLAUDE.md mục
+# X.10. Môi trường (chạy trong Tools/ADMIN):
+#   py -3.13 -m venv .venv
+#   .venv\Scripts\python -m pip install --group dev
+# Phiên bản ghim đúng bản; nâng bản thì sửa ở đây rồi cài lại, không cài tay gói lẻ vào .venv.
+
+[dependency-groups]
+app = [
+    "PyQt6==6.11.0",
+    "PyQt6-Qt6==6.11.2",
+]
+dev = [
+    { include-group = "app" },
+    "ruff==0.16.9",
+    "mypy==2.3.1",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "N", "UP", "B", "SIM", "C90", "PL", "RUF", "ANN", "PTH", "BLE"]
+# PLR2004 (magic value) tắt như readability-magic-numbers của .clang-tidy.
+ignore = ["PLR2004"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 8
+
+[tool.ruff.lint.pep8-naming]
+# Hàm ảo của Qt giữ đúng chính tả camelCase của Qt (hiến pháp IV.1: tên API nền giữ nguyên).
+extend-ignore-names = ["*Event", "sizeHint", "minimumSizeHint", "eventFilter"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_unreachable = true

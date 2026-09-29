@@ -1,0 +1,34 @@
+// Mẫu tài nguyên exe của vns_exe_resources (cmake/deploy.cmake): icon và thông tin phiên bản.
+// Sửa tệp mẫu này, không sửa bản sinh trong build/. UTF-8, nên mô tả tiếng Việt giữ nguyên dấu.
+#pragma code_page(65001)
+
+1 ICON "@VNS_RC_ICON@"
+
+1 VERSIONINFO
+FILEVERSION @PROJECT_VERSION_MAJOR@,@PROJECT_VERSION_MINOR@,@PROJECT_VERSION_PATCH@,0
+PRODUCTVERSION @PROJECT_VERSION_MAJOR@,@PROJECT_VERSION_MINOR@,@PROJECT_VERSION_PATCH@,0
+FILEFLAGSMASK 0x3fL
+FILEFLAGS 0x0L
+FILEOS 0x40004L
+FILETYPE 0x1L
+FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "042a04b0"
+        BEGIN
+            VALUE "CompanyName", "lamthit37-svg"
+            VALUE "FileDescription", "@VNS_RC_DESCRIPTION@"
+            VALUE "FileVersion", "@PROJECT_VERSION@"
+            VALUE "InternalName", "$<TARGET_FILE_BASE_NAME:@VNS_RC_TARGET@>"
+            VALUE "LegalCopyright", "Copyright (c) 2026 lamthit37-svg. Bảo lưu mọi quyền."
+            VALUE "OriginalFilename", "$<TARGET_FILE_NAME:@VNS_RC_TARGET@>"
+            VALUE "ProductName", "VnS"
+            VALUE "ProductVersion", "@PROJECT_VERSION@"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x042a, 1200
+    END
+END

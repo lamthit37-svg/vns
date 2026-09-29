@@ -12,6 +12,19 @@ vcpkg_installed/
 *.lib
 *.exp
 
+# Thư mục sản phẩm (CLAUDE.md mục X.10): exe và DLL do deploy chép vào đã bị chặn ở trên. Dữ liệu
+# chạy, log và cấu hình riêng của máy chủ không commit.
+/Server/data/
+/Server/logs/
+*.local.toml
+
+# Công cụ Python trong Tools/<Tên>/.
+.venv/
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.ruff_cache/
+
 # Đặc tả rút từ mã BitCraft, chỉ giữ ở máy dev (quyết định của chủ dự án ngày 2026-09-30).
 BITCRAFT-TINH-NANG.md
 

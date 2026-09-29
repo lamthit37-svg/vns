@@ -76,7 +76,8 @@
     { "name": "asan", "configurePreset": "asan" },
     { "name": "ubsan", "configurePreset": "ubsan" },
     { "name": "tidy", "configurePreset": "tidy" },
-    { "name": "analyze", "configurePreset": "analyze" }
+    { "name": "analyze", "configurePreset": "analyze" },
+    { "name": "deploy", "configurePreset": "rel", "targets": ["deploy"] }
   ],
   "testPresets": [
     {
@@ -127,6 +128,13 @@
       "steps": [
         { "type": "configure", "name": "analyze" },
         { "type": "build", "name": "analyze" }
+      ]
+    },
+    {
+      "name": "deploy",
+      "steps": [
+        { "type": "configure", "name": "rel" },
+        { "type": "build", "name": "deploy" }
       ]
     }
   ]

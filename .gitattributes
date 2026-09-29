@@ -6,6 +6,10 @@
 *.cmd text eol=crlf
 *.ps1 text eol=crlf
 
+# Hướng dẫn đi kèm bản phát hành, người chơi và người vận hành mở bằng Notepad.
+Client/*.txt text eol=crlf
+Server/*.txt text eol=crlf
+
 # Mã bên thứ ba giữ đúng từng byte upstream, kể cả CRLF: git không chuẩn hoá xuống dòng ở đây.
 third_party/** -text
 # Trừ hai file cấu hình của chính VnS trong cây đó.

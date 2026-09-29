@@ -25,11 +25,12 @@ if(MSVC)
 endif()
 
 include(cmake/quality.cmake)
+include(cmake/deploy.cmake)
 
 # Liên kết giữa các module đi theo tên target, nên thứ tự add_subdirectory không quan trọng.
 file(GLOB VNS_MODULE_FILES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/*/CMakeLists.txt)
 if(VNS_TOOLCHAIN_PROBE)
-    list(APPEND VNS_MODULE_FILES ${CMAKE_SOURCE_DIR}/tools/ci/probe/CMakeLists.txt)
+    list(APPEND VNS_MODULE_FILES ${CMAKE_SOURCE_DIR}/scripts/ci/probe/CMakeLists.txt)
 endif()
 if(NOT VNS_MODULE_FILES)
     # Cổng kiểm trả mã 2 khi không có tệp nguồn nào, nên chỉ dựng nó khi đã có module.

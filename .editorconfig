@@ -23,6 +23,10 @@ end_of_line = crlf
 trim_trailing_whitespace = false
 max_line_length = off
 
+# VnS: hướng dẫn đi kèm bản phát hành mở bằng Notepad (khớp .gitattributes).
+[{Client,Server}/*.txt]
+end_of_line = crlf
+
 # VnS: JSON (preset, vcpkg, .vscode) và YAML (GitHub Actions) thụt 2 như quy ước của chúng.
 [*.{json,yml,yaml}]
 indent_size = 2
@@ -37,4 +41,8 @@ trim_trailing_whitespace = unset
 indent_style = unset
 indent_size = unset
 tab_width = unset
+max_line_length = off
+
+# VnS: lệnh trong .vscode/tasks.json là một chuỗi JSON, không xuống dòng được.
+[*.json]
 max_line_length = off
