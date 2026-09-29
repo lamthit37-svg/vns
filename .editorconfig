@@ -1,0 +1,40 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+tab_width = 4
+max_line_length = 100
+
+[{*.bat,*.cmd,*.ps1,*.sln,*.vcxproj,*.props,*.targets,*.rc,*.def}]
+end_of_line = crlf
+
+[*.vcxproj.filters]
+end_of_line = crlf
+
+[*.vcxproj.user]
+end_of_line = crlf
+
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = off
+
+# VnS: JSON (preset, vcpkg, .vscode) và YAML (GitHub Actions) thụt 2 như quy ước của chúng.
+[*.{json,yml,yaml}]
+indent_size = 2
+tab_width = 2
+
+# VnS: mã bên thứ ba ở third_party/ giữ nguyên byte upstream như vendor/ của template.
+[{vendor/**,third_party/**}]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+tab_width = unset
+max_line_length = off

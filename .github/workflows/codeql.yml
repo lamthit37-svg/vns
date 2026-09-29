@@ -1,0 +1,68 @@
+# Quét bảo mật CodeQL cho C/C++: dựng preset dev dưới trình theo dõi của CodeQL, bộ truy vấn
+# security-and-quality. Chưa có tệp .cpp nào dưới src/ thì bỏ qua cả job, vì CodeQL báo lỗi khi
+# không thấy mã để phân tích.
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '27 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect:
+    name: dò mã C++
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      has_code: ${{ steps.scan.outputs.has_code }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: scan
+        run: |
+          if [ -d src ] && find src -name '*.cpp' -print -quit | grep -q .; then
+            echo "has_code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_code=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  analyze:
+    name: CodeQL (c-cpp)
+    needs: detect
+    if: needs.detect.outputs.has_code == 'true'
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+
+      - uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        with:
+          languages: c-cpp
+          build-mode: manual
+          queries: security-and-quality
+
+      - name: Build dưới CodeQL
+        shell: pwsh
+        run: cmake --workflow --preset dev
+
+      - uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        with:
+          category: /language:c-cpp

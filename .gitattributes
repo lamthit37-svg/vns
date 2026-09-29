@@ -1,0 +1,17 @@
+# Nguồn và cấu hình giữ LF như .editorconfig, không để core.autocrlf đổi sang CRLF khi checkout.
+* text=auto eol=lf
+
+# cmd đọc batch theo CRLF; LF làm nhãn goto và dòng nối trượt.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Mã bên thứ ba giữ đúng từng byte upstream, kể cả CRLF: git không chuẩn hoá xuống dòng ở đây.
+third_party/** -text
+# Trừ hai file cấu hình của chính VnS trong cây đó.
+third_party/CMakeLists.txt text eol=lf
+third_party/.clang-format text eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary

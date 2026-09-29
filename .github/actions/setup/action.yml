@@ -1,0 +1,56 @@
+name: Môi trường build VnS
+description: >-
+  Bản CI của dev.bat: nạp vcvars64 của Visual Studio mới nhất trên runner, khoá trình biên dịch về
+  cl, ghim clang-format và clang-tidy đúng bản VNS_CLANG_FORMAT_VERSION trong cmake/quality.cmake,
+  đặt VCPKG_ROOT, rồi in phiên bản mọi công cụ ra log.
+runs:
+  using: composite
+  steps:
+    - name: MSVC x64 (vcvars64)
+      shell: pwsh
+      run: |
+        $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+        $vs = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+        if (-not $vs) { throw 'Không tìm thấy Visual Studio có MSVC x64 trên runner.' }
+        # Gọi vcvars qua một tệp .cmd tạm để khỏi vướng luật quote của pwsh khi truyền cho cmd.
+        $script = Join-Path $env:RUNNER_TEMP 'vcvars_env.cmd'
+        $vcvars = Join-Path $vs 'VC\Auxiliary\Build\vcvars64.bat'
+        "@call `"$vcvars`" >nul`r`n@if errorlevel 1 exit /b 1`r`n@set" | Out-File -FilePath $script -Encoding ascii
+        $lines = cmd /d /c $script
+        if ($LASTEXITCODE -ne 0) { throw "vcvars64.bat lỗi $LASTEXITCODE" }
+        $exports = $lines | Where-Object { $_ -match '^[^=]+=' }
+        # Như dev.bat: CMake không được tự nhặt clang++ của LLVM có sẵn trên runner.
+        $exports += 'CC=cl', 'CXX=cl'
+        $exports | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+    - name: clang-format và clang-tidy đúng bản ghim
+      shell: pwsh
+      run: |
+        $match = Select-String -Path cmake/quality.cmake -Pattern 'set\(VNS_CLANG_FORMAT_VERSION ([0-9.]+)\)'
+        if (-not $match) { throw 'Không đọc được VNS_CLANG_FORMAT_VERSION trong cmake/quality.cmake.' }
+        $version = $match.Matches[0].Groups[1].Value
+        $venv = Join-Path $env:RUNNER_TEMP 'llvm-tools'
+        python -m venv $venv
+        $python = Join-Path $venv 'Scripts\python.exe'
+        & $python -m pip install --disable-pip-version-check --quiet "clang-format==$version" "clang-tidy==$version"
+        if ($LASTEXITCODE -ne 0) { throw "pip lỗi $LASTEXITCODE" }
+        Join-Path $venv 'Scripts' | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+        "VNS_LLVM_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+    - name: vcpkg và phiên bản công cụ
+      shell: pwsh
+      run: |
+        if (-not $env:VCPKG_ROOT) {
+          "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        }
+        $format = clang-format --version
+        $tidy = clang-tidy --version | Select-String 'version'
+        if ("$format" -notmatch "version $env:VNS_LLVM_VERSION") { throw "clang-format sai bản: $format" }
+        if ("$tidy" -notmatch "version $env:VNS_LLVM_VERSION") { throw "clang-tidy sai bản: $tidy" }
+        cmd /d /c "cl 2>&1" | Select-Object -First 1
+        "clang-format: $format"
+        "clang-tidy: $tidy"
+        cmake --version | Select-Object -First 1
+        "ninja $(ninja --version)"
+        "node $(node --version)"
+        "VCPKG_ROOT=$(if ($env:VCPKG_ROOT) { $env:VCPKG_ROOT } else { $env:VCPKG_INSTALLATION_ROOT })"

@@ -1,0 +1,98 @@
+{
+  "version": "2.0.0",
+  "options": {
+    "cwd": "${workspaceFolder}"
+  },
+  "tasks": [
+    {
+      "label": "VnS: build dev",
+      "type": "process",
+      "command": "cmd.exe",
+      "args": ["/d", "/c", "chcp 65001 >nul && call %USERPROFILE%\\.claude\\bin\\dev.bat && cmake --workflow --preset dev"],
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": ["$msCompile"]
+    },
+    {
+      "label": "VnS: build rel",
+      "type": "process",
+      "command": "cmd.exe",
+      "args": ["/d", "/c", "chcp 65001 >nul && call %USERPROFILE%\\.claude\\bin\\dev.bat && cmake --workflow --preset rel"],
+      "group": "build",
+      "problemMatcher": ["$msCompile"]
+    },
+    {
+      "label": "VnS: clang-tidy",
+      "type": "process",
+      "command": "cmd.exe",
+      "args": ["/d", "/c", "chcp 65001 >nul && call %USERPROFILE%\\.claude\\bin\\dev.bat && cmake --workflow --preset tidy"],
+      "group": "build",
+      "problemMatcher": ["$msCompile", "$gcc"]
+    },
+    {
+      "label": "VnS: /analyze",
+      "type": "process",
+      "command": "cmd.exe",
+      "args": ["/d", "/c", "chcp 65001 >nul && call %USERPROFILE%\\.claude\\bin\\dev.bat && cmake --workflow --preset analyze"],
+      "group": "build",
+      "problemMatcher": ["$msCompile"]
+    },
+    {
+      "label": "VnS: build asan",
+      "type": "process",
+      "command": "cmd.exe",
+      "args": ["/d", "/c", "chcp 65001 >nul && call %USERPROFILE%\\.claude\\bin\\dev.bat && cmake --workflow --preset asan"],
+      "group": "build",
+      "problemMatcher": ["$msCompile"]
+    },
+    {
+      "label": "VnS: build ubsan",
+      "type": "process",
+      "command": "cmd.exe",
+      "args": ["/d", "/c", "chcp 65001 >nul && call %USERPROFILE%\\.claude\\bin\\dev.bat && cmake --workflow --preset ubsan"],
+      "group": "build",
+      "problemMatcher": ["$msCompile", "$gcc"]
+    },
+    {
+      "label": "VnS: cổng kiểm hình thức",
+      "type": "process",
+      "command": "cmd.exe",
+      "args": ["/d", "/c", "chcp 65001 >nul && call %USERPROFILE%\\.claude\\bin\\dev.bat && node tools/check_style.js src"],
+      "problemMatcher": []
+    },
+    {
+      "label": "VnS: định dạng toàn bộ src",
+      "type": "process",
+      "command": "cmd.exe",
+      "args": ["/d", "/c", "call %USERPROFILE%\\.claude\\bin\\dev.bat && for /r src %f in (*.cpp *.hpp) do @clang-format -i %f"],
+      "problemMatcher": []
+    },
+    {
+      "label": "VnS: chạy exe (dev)",
+      "type": "process",
+      "command": "${workspaceFolder}/build/dev/bin/${input:exe}.exe",
+      "dependsOn": "VnS: build dev",
+      "problemMatcher": []
+    },
+    {
+      "label": "VnS: xoá thư mục build của một preset",
+      "type": "process",
+      "command": "cmd.exe",
+      "args": ["/d", "/c", "if exist build\\${input:preset} rmdir /s /q build\\${input:preset}"],
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "exe",
+      "type": "promptString",
+      "description": "Tên exe trong build/dev/bin, không kèm đuôi .exe",
+      "default": "vns"
+    },
+    {
+      "id": "preset",
+      "type": "pickString",
+      "description": "Preset cần xoá thư mục build (cache hỏng sau một lần configure lỗi)",
+      "options": ["dev", "rel", "asan", "ubsan", "tidy", "analyze"]
+    }
+  ]
+}

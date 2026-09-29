@@ -1,0 +1,23 @@
+# Sản phẩm build — mọi preset ghi vào build/<preset>, không lẫn vào nguồn.
+build/
+out/
+vcpkg_installed/
+
+# Rác của trình biên dịch và công cụ khi lỡ chạy ngoài thư mục build.
+*.exe
+*.dll
+*.obj
+*.pdb
+*.ilk
+*.lib
+*.exp
+
+# Đặc tả rút từ mã BitCraft, chỉ giữ ở máy dev (quyết định của chủ dự án ngày 2026-09-30).
+BITCRAFT-TINH-NANG.md
+
+# Trạng thái riêng của từng máy, từng người.
+.vs/
+.cache/
+*.user
+CMakeUserPresets.json
+.worktrees/

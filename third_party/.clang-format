@@ -1,0 +1,3 @@
+# Mã upstream giữ nguyên từng byte: clangd và format-on-save không được định dạng lại cây này.
+DisableFormat: true
+SortIncludes: Never

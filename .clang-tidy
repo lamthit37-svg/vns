@@ -1,0 +1,51 @@
+# Gốc là bản chính thức ~/.claude/bin/clang-tidy.template; lý do của ba lựa chọn gốc ở skill
+# cpp-new-project. Phần VnS thêm vào có ghi mục hiến pháp. Đo ngày 2026-09-30: bản gốc báo lỗi trên
+# mã viết đúng hiến pháp ở guard clause một dòng (V.2), tên ngắn `n` (IV.1) và kiểu nền enum.
+# Preset tidy chạy với --warnings-as-errors=*, nên mọi cảnh báo ở đây chặn được build.
+Checks: >
+  -*,
+  bugprone-*,
+  cppcoreguidelines-*,
+  modernize-*,
+  performance-*,
+  readability-*,
+  -bugprone-exception-escape,
+  -modernize-use-trailing-return-type,
+  -readability-magic-numbers,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -performance-enum-size
+WarningsAsErrors: ''
+# compile_commands mang cờ của cl; /Zc:preprocessor không có nghĩa với clang và /WX biến lời nhắc
+# "argument unused" thành lỗi giả ở đầu mọi file khi chạy clang-tidy -p trực tiếp (đo 2026-09-30).
+ExtraArgs: ['-Wno-unused-command-line-argument']
+HeaderFilterRegex: '^.*[/\](src|include|tests)[/\].*'
+ExcludeHeaderFilterRegex: '^.*[/\](third_party|build)[/\].*'
+CheckOptions:
+  # V.2: guard clause một dòng không ngoặc; thân trải từ hai dòng trở lên (vòng lặp) phải có ngoặc.
+  readability-braces-around-statements.ShortStatementLines: 1
+  # IV.1: tên ngắn hợp lệ trong phạm vi vài dòng.
+  readability-identifier-length.IgnoredVariableNames: '^(n|it|ok|id|io)$'
+  readability-identifier-length.IgnoredParameterNames: '^(n|it|id|io)$'
+  readability-identifier-length.IgnoredLoopCounterNames: '^[ijkn]$'
+  # IV.1: snake_case cho hàm, biến, namespace; PascalCase cho type và enumerator; kPascalCase cho
+  # hằng constexpr; member private và protected mang hậu tố _ (CLAUDE.md của VnS mục X.8).
+  readability-identifier-naming.NamespaceCase: lower_case
+  readability-identifier-naming.ClassCase: CamelCase
+  readability-identifier-naming.StructCase: CamelCase
+  readability-identifier-naming.UnionCase: CamelCase
+  readability-identifier-naming.EnumCase: CamelCase
+  readability-identifier-naming.EnumConstantCase: CamelCase
+  readability-identifier-naming.TypeAliasCase: CamelCase
+  readability-identifier-naming.TypedefCase: CamelCase
+  readability-identifier-naming.TemplateParameterCase: CamelCase
+  readability-identifier-naming.ConceptCase: CamelCase
+  readability-identifier-naming.FunctionCase: lower_case
+  readability-identifier-naming.MethodCase: lower_case
+  readability-identifier-naming.VariableCase: lower_case
+  readability-identifier-naming.ParameterCase: lower_case
+  readability-identifier-naming.MemberCase: lower_case
+  readability-identifier-naming.PrivateMemberSuffix: '_'
+  readability-identifier-naming.ProtectedMemberSuffix: '_'
+  readability-identifier-naming.ConstexprVariableCase: CamelCase
+  readability-identifier-naming.ConstexprVariablePrefix: 'k'
+  readability-identifier-naming.MacroDefinitionCase: UPPER_CASE

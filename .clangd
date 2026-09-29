@@ -1,0 +1,17 @@
+# clangd trong VS Code: lấy compile_commands của preset dev (build/dev), chạy clang-tidy theo
+# .clang-tidy ngay khi gõ, và định dạng khi lưu theo .clang-format.
+CompileFlags:
+  CompilationDatabase: build/dev
+  # Lệnh biên dịch là của cl; clang bỏ qua /Zc:preprocessor, rồi /WX biến lời nhắc thành lỗi giả.
+  Add: [-Wno-unused-command-line-argument]
+Diagnostics:
+  UnusedIncludes: Strict
+---
+# Mã bên thứ ba giữ đúng từng byte upstream: không chẩn đoán, không tidy.
+If:
+  PathMatch: third_party/.*
+Diagnostics:
+  Suppress: '*'
+  UnusedIncludes: None
+  ClangTidy:
+    Remove: '*'

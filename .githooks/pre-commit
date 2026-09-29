@@ -1,0 +1,4 @@
+#!/bin/sh
+# Cổng kiểm hình thức trước mỗi commit; logic ở tools/hooks/pre_commit.js.
+# Bật một lần sau khi clone: git config core.hooksPath .githooks
+exec node "$(git rev-parse --show-toplevel)/tools/hooks/pre_commit.js"

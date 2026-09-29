@@ -1,0 +1,9 @@
+# Cập nhật SHA ghim của các action mỗi tuần; Dependabot mở pull request, CI dựng lại trước khi gộp.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci

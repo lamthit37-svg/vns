@@ -1,0 +1,82 @@
+# CD của VnS: đẩy tag vX.Y.Z (khớp project(VnS VERSION X.Y.Z) trong CMakeLists.txt) thì dựng preset
+# rel, đóng gói exe và pdb thành zip, kèm SHA256SUMS và chứng thực nguồn gốc build (provenance),
+# rồi tạo GitHub Release với ghi chú tự sinh từ commit.
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: phát hành ${{ github.ref_name }}
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 40
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    env:
+      TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Tag khớp phiên bản trong CMakeLists.txt
+        shell: pwsh
+        run: |
+          $match = Select-String -Path CMakeLists.txt -Pattern 'project\(VnS VERSION ([0-9.]+)'
+          if (-not $match) { throw 'Không đọc được project(VnS VERSION ...) trong CMakeLists.txt.' }
+          $version = $match.Matches[0].Groups[1].Value
+          if ($env:TAG -ne "v$version") { throw "Tag $env:TAG không khớp project(VnS VERSION $version)." }
+          "VNS_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - uses: ./.github/actions/setup
+
+      - name: Build rel
+        shell: pwsh
+        run: cmake --workflow --preset rel
+
+      - name: Test tự động
+        if: hashFiles('tests/CMakeLists.txt') != ''
+        shell: pwsh
+        run: ctest --test-dir build/rel --output-on-failure --timeout 120 -j 4
+
+      - name: Đóng gói
+        shell: pwsh
+        run: |
+          $bin = 'build/rel/bin'
+          $programs = @(Get-ChildItem -Path "$bin/*" -Include *.exe, *.dll -File)
+          if ($programs.Count -eq 0) { throw "$bin không có exe nào để phát hành." }
+          $dist = New-Item -ItemType Directory -Force -Path dist
+          $name = "vns-$env:VNS_VERSION-win64"
+          Compress-Archive -Path $programs.FullName -DestinationPath "dist/$name.zip"
+          $symbols = @(Get-ChildItem -Path "$bin/*" -Include *.pdb -File)
+          if ($symbols.Count -gt 0) { Compress-Archive -Path $symbols.FullName -DestinationPath "dist/$name-pdb.zip" }
+          $sums = Get-ChildItem -Path dist -Filter *.zip | ForEach-Object {
+            $hash = (Get-FileHash -Algorithm SHA256 -Path $_.FullName).Hash.ToLowerInvariant()
+            "$hash  $($_.Name)"
+          }
+          $sums | Out-File -FilePath "$($dist.FullName)/SHA256SUMS.txt" -Encoding utf8
+          Get-ChildItem dist
+
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: dist/*.zip
+
+      - name: Tạo GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $assets = @(Get-ChildItem -Path dist -File | ForEach-Object FullName)
+          gh release create $env:TAG @assets --title "VnS $env:TAG" --generate-notes --verify-tag
+          if ($LASTEXITCODE -ne 0) { throw "gh release create lỗi $LASTEXITCODE" }

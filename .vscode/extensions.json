@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "llvm-vs-code-extensions.vscode-clangd",
+    "ms-vscode.cpptools",
+    "editorconfig.editorconfig",
+    "github.vscode-github-actions"
+  ],
+  "unwantedRecommendations": [
+    "ms-vscode.cmake-tools",
+    "ms-vscode.cpptools-extension-pack"
+  ]
+}

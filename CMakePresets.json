@@ -1,0 +1,133 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 28, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "VCPKG_TARGET_TRIPLET": "x64-windows"
+      }
+    },
+    {
+      "name": "dev",
+      "inherits": "base",
+      "displayName": "Debug (MSVC)",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "rel",
+      "inherits": "base",
+      "displayName": "RelWithDebInfo (MSVC, /O2 /Ob2, /OPT:REF /OPT:ICF)",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_C_FLAGS_RELWITHDEBINFO": "/O2 /Ob2 /DNDEBUG",
+        "CMAKE_CXX_FLAGS_RELWITHDEBINFO": "/O2 /Ob2 /DNDEBUG",
+        "CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO": "/debug /OPT:REF /OPT:ICF"
+      }
+    },
+    {
+      "name": "asan",
+      "inherits": "base",
+      "displayName": "Debug + AddressSanitizer (MSVC)",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_FLAGS_DEBUG": "/Ob0 /Od /fsanitize=address",
+        "CMAKE_CXX_FLAGS_DEBUG": "/Ob0 /Od /fsanitize=address",
+        "CMAKE_EXE_LINKER_FLAGS_DEBUG": "/debug"
+      }
+    },
+    {
+      "name": "ubsan",
+      "inherits": "base",
+      "displayName": "UBSan (clang-cl, CRT tĩnh /MT)",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_C_COMPILER": "clang-cl",
+        "CMAKE_CXX_COMPILER": "clang-cl",
+        "CMAKE_C_FLAGS_RELWITHDEBINFO": "/Od -fsanitize=undefined",
+        "CMAKE_CXX_FLAGS_RELWITHDEBINFO": "/Od -fsanitize=undefined",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded",
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static"
+      }
+    },
+    {
+      "name": "tidy",
+      "inherits": "dev",
+      "displayName": "Debug + clang-tidy trên mọi TU, cảnh báo là lỗi",
+      "cacheVariables": {
+        "CMAKE_CXX_CLANG_TIDY": "clang-tidy;--quiet;--warnings-as-errors=*"
+      }
+    },
+    {
+      "name": "analyze",
+      "inherits": "dev",
+      "displayName": "Debug + /analyze của MSVC",
+      "cacheVariables": { "VNS_ANALYZE": "ON" }
+    }
+  ],
+  "buildPresets": [
+    { "name": "dev", "configurePreset": "dev" },
+    { "name": "rel", "configurePreset": "rel" },
+    { "name": "asan", "configurePreset": "asan" },
+    { "name": "ubsan", "configurePreset": "ubsan" },
+    { "name": "tidy", "configurePreset": "tidy" },
+    { "name": "analyze", "configurePreset": "analyze" }
+  ],
+  "testPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "output": { "outputOnFailure": true },
+      "execution": { "jobs": 12, "timeout": 120 }
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "dev",
+      "steps": [
+        { "type": "configure", "name": "dev" },
+        { "type": "build", "name": "dev" }
+      ]
+    },
+    {
+      "name": "rel",
+      "steps": [
+        { "type": "configure", "name": "rel" },
+        { "type": "build", "name": "rel" }
+      ]
+    },
+    {
+      "name": "asan",
+      "steps": [
+        { "type": "configure", "name": "asan" },
+        { "type": "build", "name": "asan" }
+      ]
+    },
+    {
+      "name": "ubsan",
+      "steps": [
+        { "type": "configure", "name": "ubsan" },
+        { "type": "build", "name": "ubsan" }
+      ]
+    },
+    {
+      "name": "tidy",
+      "steps": [
+        { "type": "configure", "name": "tidy" },
+        { "type": "build", "name": "tidy" }
+      ]
+    },
+    {
+      "name": "analyze",
+      "steps": [
+        { "type": "configure", "name": "analyze" },
+        { "type": "build", "name": "analyze" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Gỡ lỗi exe (dev)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/dev/bin/${input:exe}.exe",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "preLaunchTask": "VnS: build dev"
+    },
+    {
+      "name": "Gỡ lỗi exe (asan)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/asan/bin/${input:exe}.exe",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "preLaunchTask": "VnS: build asan"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "exe",
+      "type": "promptString",
+      "description": "Tên exe trong build/<preset>/bin, không kèm đuôi .exe",
+      "default": "vns"
+    }
+  ]
+}

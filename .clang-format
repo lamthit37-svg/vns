@@ -1,0 +1,65 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+Standard: Latest
+ColumnLimit: 100
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+AccessModifierOffset: -4
+PointerAlignment: Left
+DerivePointerAlignment: false
+
+# Hiến pháp mục 0.1 — cấm căn thẳng cột ở mọi dạng.
+AlignTrailingComments: false
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignConsecutiveMacros: false
+AlignConsecutiveBitFields: false
+AlignEscapedNewlines: DontAlign
+AlignOperands: DontAlign
+AlignArrayOfStructures: None
+# Dòng nối tiếp thụt đúng 4 khoảng, KHÔNG căn theo dấu ngoặc mở.
+#
+# DontAlign chứ không phải AlwaysBreak: cả hai đều bỏ căn cột, nhưng AlwaysBreak bắt xuống dòng
+# ngay sau dấu "(" rồi mới thụt, nên một guard clause dài thành ba bậc thang
+# (if → return fail( → tham số). DontAlign giữ tham số đầu ngay sau dấu ngoặc và chỉ thụt đúng
+# một bậc cho phần tràn.
+AlignAfterOpenBracket: DontAlign
+ContinuationIndentWidth: 4
+BreakBeforeBinaryOperators: None
+BreakConstructorInitializers: BeforeColon
+ConstructorInitializerIndentWidth: 4
+PackConstructorInitializers: NextLine
+LambdaBodyIndentation: Signature
+
+# Khai báo template giữ dòng riêng. Mặc định của LLVM gộp nó vào dòng hàm khi vừa chỗ, làm hai
+# hàm cạnh nhau có hình dạng khác nhau chỉ vì tên dài ngắn khác nhau.
+AlwaysBreakTemplateDeclarations: Yes
+
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortLoopsOnASingleLine: false
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: false
+  AfterControlStatement: Never
+  AfterEnum: false
+  AfterFunction: false
+  AfterNamespace: false
+  AfterStruct: false
+  AfterUnion: false
+  AfterExternBlock: false
+  BeforeCatch: false
+  BeforeElse: false
+  BeforeLambdaBody: false
+  BeforeWhile: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+IndentCaseLabels: true
+# Không tự chèn dòng trống giữa mọi định nghĩa: hàm một dòng trong lớp đứng liền nhau đọc
+# nhanh hơn, dòng trống để dành cho chỗ thật sự ngắt ý.
+SeparateDefinitionBlocks: Leave
+MaxEmptyLinesToKeep: 1
+KeepEmptyLinesAtTheStartOfBlocks: false

@@ -1,0 +1,85 @@
+# CI của VnS: mỗi push lên main và mỗi pull request dựng đủ sáu preset trên Windows + VS 2026,
+# đúng những preset mà máy dev dùng. Cổng kiểm hình thức chạy bên trong build (target check_style),
+# clang-tidy và /analyze có preset riêng, cảnh báo nào cũng là lỗi.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  workflows:
+    name: kiểm workflow (actionlint)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: actionlint 1.7.12
+        run: |
+          archive=actionlint_1.7.12_linux_amd64.tar.gz
+          curl -sSfL -o "$archive" "https://github.com/rhysd/actionlint/releases/download/v1.7.12/$archive"
+          echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $archive" | sha256sum -c -
+          tar -xzf "$archive" actionlint
+          ./actionlint -color
+
+  build:
+    name: build (${{ matrix.preset }})
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [dev, rel, asan, ubsan, tidy, analyze]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+
+      # VNS_TOOLCHAIN_PROBE dựng thêm tools/ci/probe, để cổng kiểm, tidy, /analyze và sanitizer có
+      # mã thật mà chạy ngay cả khi src/ còn trống.
+      - name: Configure và build
+        shell: pwsh
+        run: |
+          cmake --preset ${{ matrix.preset }} -DVNS_TOOLCHAIN_PROBE=ON
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cmake --build --preset ${{ matrix.preset }}
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Chạy exe thăm dò toolchain
+        shell: pwsh
+        run: |
+          & "build/${{ matrix.preset }}/bin/vns_probe.exe"
+          if ($LASTEXITCODE -ne 0) { throw "vns_probe trả mã $LASTEXITCODE (manifest UTF-8 hoặc runtime hỏng)." }
+
+      # Kiểm thử chính là danh sách tay docs/KIEM-THU.md; tests/ chỉ có khi một phép thử không làm
+      # tay được (CLAUDE.md mục X.7), và khi đó nó chạy ở đây.
+      - name: Test tự động
+        if: hashFiles('tests/CMakeLists.txt') != '' && contains(fromJSON('["dev","asan","ubsan"]'), matrix.preset)
+        shell: pwsh
+        run: ctest --test-dir build/${{ matrix.preset }} --output-on-failure --timeout 120 -j 4
+
+      - name: Lưu exe bản rel
+        if: matrix.preset == 'rel' && hashFiles('src/*/CMakeLists.txt') != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vns-rel-${{ github.sha }}
+          path: |
+            build/rel/bin/*.exe
+            build/rel/bin/*.dll
+            build/rel/bin/*.pdb
+            !build/rel/bin/vns_probe.*
+          if-no-files-found: error
+          retention-days: 14
