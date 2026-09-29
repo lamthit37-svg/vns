@@ -17,11 +17,11 @@ BEGIN
     BEGIN
         BLOCK "042a04b0"
         BEGIN
-            VALUE "CompanyName", "lamthit37-svg"
+            VALUE "CompanyName", "HooN-HP"
             VALUE "FileDescription", "@VNS_RC_DESCRIPTION@"
             VALUE "FileVersion", "@PROJECT_VERSION@"
             VALUE "InternalName", "$<TARGET_FILE_BASE_NAME:@VNS_RC_TARGET@>"
-            VALUE "LegalCopyright", "Copyright (c) 2026 lamthit37-svg. Bảo lưu mọi quyền."
+            VALUE "LegalCopyright", "Copyright (c) 2026 HooN-HP. Bảo lưu mọi quyền."
             VALUE "OriginalFilename", "$<TARGET_FILE_NAME:@VNS_RC_TARGET@>"
             VALUE "ProductName", "VnS"
             VALUE "ProductVersion", "@PROJECT_VERSION@"

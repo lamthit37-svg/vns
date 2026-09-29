@@ -15,7 +15,8 @@ thuẫn. File này chỉ giữ phần riêng của VnS, và mỗi luật riêng 
   danh mục tính năng server BitCraft rút từ `%USERPROFILE%\Desktop\BitCraftPublic` (Rust,
   SpacetimeDB, commit `9983494`). Mã gốc theo Apache 2.0; art, nội dung game và IP của BitCraft
   không được dùng, và không được vận hành server BitCraft cạnh tranh (đặc tả mục 1.1).
-- Giấy phép của VnS: độc quyền, xem `LICENSE`.
+- Giấy phép của VnS: độc quyền, chủ bản quyền `HooN-HP`, xem `LICENSE`. Tên này cũng nằm trong
+  `CompanyName` và `LegalCopyright` của mọi exe (`cmake/exe.rc.in`); đổi thì đổi cả hai chỗ.
 - Hồ sơ tối ưu theo `cpp23-standard` mục 0.1: `app`. Ngân sách kích thước: không có.
 
 ## X.2 Bố cục
