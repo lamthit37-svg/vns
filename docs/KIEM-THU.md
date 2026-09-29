@@ -87,9 +87,10 @@ trên một bản sao thăm dò có cấy lỗi, không nằm trong repo.
 - [x] K-022 — Hook pre-commit với Python. Lệnh: stage một tệp `.py` sai dưới `Tools/ADMIN`, chạy
   `node scripts/hooks/pre_commit.js`, rồi sửa tệp cho đúng và chạy lại. Mong đợi: lần một thoát 1
   và in lỗi ruff; lần hai thoát 0. Đạt 2026-09-30. Nhánh tool chưa có `.venv` chưa chạy.
-- [ ] K-023 — CI sau khi thêm thư mục sản phẩm. Lệnh: push lên `main`. Mong đợi: job
+- [x] K-023 — CI sau khi thêm thư mục sản phẩm. Lệnh: push lên `main`. Mong đợi: job
   `Tools Python` xanh (dựng `.venv` của ADMIN từ bản ghim); job `rel` cài thử kiểu deploy có
   `vcruntime140.dll`, không pdb, `ProductVersion` dạng `X.Y.Z`, và `vns_probe` từ bản cài thoát 0.
+  Đạt 2026-09-30 (commit `8a103b6`, 8/8 job, bước `Cài thử kiểu deploy` của `rel` xanh).
 
 ## Tính năng
 
